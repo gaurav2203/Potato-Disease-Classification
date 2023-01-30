@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href={{url_for('static' , filename = 'css/temp.css')}}>
+  <title>Document</title>
+</head>
+
+<body>
+
+    <h1>Upload an Image of Potato Leaf</h1>
+    <div class="image-preview-container">
+        <div class="preview">
+            <img id="preview-selected-image" />
+        </div>
+        <form action="/predict" method="post", enctype="multipart/form-data">
+            <label for="file-upload">Browse Image</label>
+            <input type="file" id="file-upload" name="file" accept="image/*" onchange="previewImage(event);" />
+            <br>
+            <label for="submit">Submit Image</label>
+            <input type="submit" id="submit" value="Upload"/>
+        </form>
+    </div>
+
+    <!-- FOR PREDICTION -->
+    <br>
+    <br>
+    <div class="pred-container">
+        <h2>Leaf Class= {{ predicted_class }}</h2>
+        <h2>Confidence Score= {{ confidence }}</h2>
+    </div>
+
+    <script>
+        const previewImage = (event) => {
+        const imageFiles = event.target.files;
+        const imageFilesLength = imageFiles.length;
+        if (imageFilesLength > 0) {
+            const imageSrc = URL.createObjectURL(imageFiles[0]);
+            const imagePreviewElement = document.querySelector("#preview-selected-image");
+            imagePreviewElement.src = imageSrc;
+            imagePreviewElement.style.display = "block";
+        }
+};
+    </script>
+</body>
+</html>
