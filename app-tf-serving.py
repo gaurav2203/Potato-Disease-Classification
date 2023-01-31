@@ -1,16 +1,8 @@
-import os
-import uuid
-import urllib
-from PIL import Image
-from tensorflow.keras.models import load_model
-from flask import Flask , render_template  , request , send_file
-from tensorflow.keras.preprocessing.image import load_img , img_to_array
+import json, os, requests
+from flask import Flask, render_template, request, jsonify
+from io import BytesIO
+from tensorflow.keras.preprocessing import image
 import numpy as np
-import sys
-if not sys.warnoptions:
-    import warnings
-    warnings.simplefilter("ignore")
-
 
 app= Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,32 +22,49 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXT
 
-def predict(filename, model):
-    img= load_img(filename, target_size= (256, 256))
-    img_array= img_to_array(img)
-    img_array_reshape= img_array.reshape(1 , 256 , 256,3)
-    prediction= model.predict(img_array_reshape)
-    print(prediction.tolist())
-    index= np.argmax(prediction[0])
-    predicted_class= CLASS_NAMES[index]
-    confidence= (np.max(prediction[0])*100)
-    confidence= round(confidence, 2)
-    return predicted_class, confidence
+# def predict(filename):
+#     img= image.load_img(filename, target_size= (256, 256))
+#     img_array= image.img_to_array(img)
+#     img_array_reshape= img_array.reshape(1 , 256 , 256, 3)
+
+#     # img_final= img.astype('float16')
+#     payload= {
+#         "instances": [{'input_image': img_array_reshape.tolist()}]
+#     }
+
+#     # Sending POST request to tf serving server
+#     response= requests.post(endpoint, data=json.dumps(payload))
+#     prediction= np.array(response.json()["predictions"][0])
+
+#     index= np.argmax(prediction[0])
+#     predicted_class= CLASS_NAMES[index]
+#     confidence= (np.max(prediction[0])*100)
+#     confidence= round(confidence, 2)
+#     return predicted_class, confidence
 
 @app.route('/predict', methods=['GET', 'POST'])
 def predict_output():
     error= ''
+    data={}
     target_img_path= os.path.join(os.getcwd(), 'static/images')
     if request.method == 'POST':
         if (request.files):
             file= request.files['file']
             if file and allowed_file(file.filename):
-                file.save(os.path.join(target_img_path, file.filename))
-                img_path= os.path.join(target_img_path, file.filename)
-                img= file.filename
-                # return img_path
-                print(img_path)
-                predicted_class, confidence= predict(img_path, model)
+                img= image.img_to_array(image.load_img(BytesIO(request.files["file"].read()), target_size=(256, 256)))/ 255.
+                img= img.astype('float16')
+                payload= {
+                    "instances": [{'input_image': img.tolist()}]
+                }
+                r= requests.post(endpoint, json= payload)
+                prediction= json.loads(r.content.decode('utf-8'))
+
+                index= np.argmax(prediction[0])
+                predicted_class= CLASS_NAMES[index]
+                confidence= (np.max(prediction[0])*100)
+                confidence= round(confidence, 2)
+                return predicted_class, confidence
+
             else:
                 error= "Please upload images of jpg, jpeg and png extension only"
 
