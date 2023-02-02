@@ -5,6 +5,7 @@ Farmers every year face economic loss and crop waste due to various diseases in 
 
 1. Healthy 
 ![Image](/static/images/readme_healthy.JPG)
+<img src= '/static/images/readme_healthy.JPG'>
 2. Early Blight
 ![Image](/static/images/readme_early.JPG)
 3. Late Blight
@@ -19,7 +20,7 @@ Here, I have created a deep learning model for the prediction of the class of po
 ![Image](/static/images/readme_model-summary.jpg)
 
 ## Model Accuracy
-![Image](/static/images/readme_accuracy.png)
+![Image](https://github.com/gaurav2203/Potato-Disease-Classification/blob/tf-serving/static/images/readme_accuracy.png)
 
 ## Project Architecture
 ![Image](/static/images/readme_tf-serving.png)
